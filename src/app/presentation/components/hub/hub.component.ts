@@ -12,10 +12,11 @@ import { Observable, Subject } from 'rxjs';
 export class HubComponent {
   private hubConnection: HubConnection;
   private messageSubject: Subject<any> = new Subject<any>();
+  public lastMessage: string = ''
 
   constructor() {
     this.hubConnection = new HubConnectionBuilder()
-      .withUrl('https://localhost:7291/chatHub')
+      .withUrl('https://localhost:7242/chatHub')
       .build();
 
     this.startConnection();
@@ -25,7 +26,7 @@ export class HubComponent {
     this.hubConnection
       .start()
       .then(() => {
-        console.log('Connection started');
+        console.log('Connection started NOW');
         this.registerEvents();
       })
       .catch((err) => console.error('Error while starting connection: ' + err));
@@ -33,13 +34,14 @@ export class HubComponent {
 
   private registerEvents(): void {
     this.hubConnection.on('ReceiveMessage', (user, message) => {
+      this.lastMessage = message
       console.log(`${user} says ${message}`);
     });
   }
 
-  public sendMessage(message: string): void {
+  public sendMessage(): void {
     this.hubConnection
-      .invoke('SendMessage', message)
+      .invoke('SendMessage', 'HelloUSer', new Date())
       .catch((err) => console.error('Error while sending message: ' + err));
   }
 
