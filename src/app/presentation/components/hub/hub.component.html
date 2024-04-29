@@ -1,9 +1,35 @@
-<button (click)="sendMessage()">send</button>
+<div class="max-w-sm mx-auto bg-white shadow-md rounded-lg overflow-hidden">
+  <div class="px-4 py-2">
+    <p class="font-semibold text-gray-700">{{ lastMessage.user }}</p>
+    <p class="text-gray-600">{{ lastMessage.message }}</p>
+  </div>
+</div>
 
-<p>{{ lastMessage }}</p>
+<section class="fixed bottom-28 left-0 w-full flex justify-center bg-blue-500">
+  @if (messageForm.get('userMessage')?.hasError('required') &&
+  messageForm.get('userMessage')?.touched) {
+  <p>Escribe algo!.</p>
+  }
+</section>
 
-
-
-<section class="fixed bottom-0 left-0 w-full flex justify-center p-1 bg-blue-500">
-  <input type="text" placeholder="Type something" class="w-3/4 rounded p-1 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent">
+<section
+  class="fixed bottom-0 left-0 w-full flex justify-center p-1 bg-blue-500"
+>
+  <form [formGroup]="messageForm" class="w-8/12">
+    <input
+      type="text"
+      id="userMessage"
+      formControlName="userMessage"
+      placeholder="Type something"
+      class="w-3/4 rounded p-1 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+      required
+    />
+    <button
+      type="submit"
+      (click)="sendMessage()"
+      class="p-1 m-1 rounded bg-gray-100 hover:bg-yellow-300"
+    >
+      send
+    </button>
+  </form>
 </section>

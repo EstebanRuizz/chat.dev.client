@@ -1,25 +1,42 @@
-import { Component, OnInit } from '@angular/core';
-import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import { Component } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
+import { HubConnection, HubConnectionBuilder } from '@microsoft/signalr';
+import {
+  FormBuilder,
+  FormGroup,
+  ReactiveFormsModule,
+  Validators,
+} from '@angular/forms';
+import { EnumSocket } from '../../../core/application/enums/EnumSocket';
+import { UserMessageDTO } from '../../../core/application/DTO/UserMessageDTO';
 
 @Component({
   selector: 'app-hub',
   standalone: true,
-  imports: [],
+  imports: [ReactiveFormsModule],
   templateUrl: './hub.component.html',
   styleUrl: './hub.component.css',
 })
 export class HubComponent {
   private hubConnection: HubConnection;
   private messageSubject: Subject<any> = new Subject<any>();
-  public lastMessage: string = ''
+  public lastMessage: UserMessageDTO = { user: '', message: '' };
+  public messageForm!: FormGroup;
 
-  constructor() {
+  constructor(private readonly formBuilder: FormBuilder) {
     this.hubConnection = new HubConnectionBuilder()
       .withUrl('https://localhost:7242/chatHub')
       .build();
 
     this.startConnection();
+    this.initForm();
+  }
+
+  private initForm(): void {
+    this.messageForm = this.formBuilder.group({
+      userMessage: ['', [Validators.required]],
+      userId: ['', [Validators.required]],
+    });
   }
 
   private startConnection(): void {
@@ -33,15 +50,24 @@ export class HubComponent {
   }
 
   private registerEvents(): void {
-    this.hubConnection.on('ReceiveMessage', (user, message) => {
-      this.lastMessage = message
+    this.hubConnection.on(EnumSocket.ReceiveMessage, (user, message) => {
+      this.lastMessage = {
+        user: user,
+        message: message,
+      };
       console.log(`${user} says ${message}`);
     });
   }
 
   public sendMessage(): void {
+    console.log(this.messageForm.get('userMessage')!.value);
+
     this.hubConnection
-      .invoke('SendMessage', 'HelloUSer', new Date())
+      .invoke(
+        EnumSocket.SendMessage,
+        'Esteban',
+        this.messageForm.get('userMessage')!.value
+      )
       .catch((err) => console.error('Error while sending message: ' + err));
   }
 
